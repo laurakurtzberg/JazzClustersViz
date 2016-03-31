@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Jazz Clusters</title>
+    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+    <script type="text/javascript" src="colorbrewer.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div id="vizcanvas"></div>
+    <script type="text/javascript">
+      var margin = {top: 40, left: 40, bottom: 40, right: 40},
+      width = 650 - margin.left - margin.right,
+      height = 550 - margin.top - margin.bottom;
+
+      var body = d3.select("body");
+
+      /* Create a function to find the number of variations of each variable
+      and assign each one to a case... for example, check the first value, assign it to
+      a case, if the next one is different assign it to a new case (add to array of cases)
+      if not go on to the next one... Lets try organizing by performer first */
+
+      //I need to append a new svg with class pack for each cluster....
+
+      /* Then create as many clusters as there are cases.... one in the center, and others
+      at focal points at staggered distance from the center - divide circle into different
+      angles at which to put clusters, and then a random distance from the center as long
+      as it is far enough away to make room for a big cluster? */
+
+      /* Start by making one big cluster in the middle so I can make a cluster to begin with...
+      use collision detection? or use pack layout? */
+
+      var diameter = 700,
+          format = d3.format(",d"),
+          colormap = d3.scale.category20c();
+            //var colorscale = d.scale.ordinal() ... use colorbrewer greyscale scale?
+
+      //create a pack layout
+      var pack = d3.layout.pack()
+          .size([diameter, diameter])
+          .padding(1.5)
+          .value(function(d) { return 4 });
+
+      var vis = d3.select("#vizcanvas").append("svg")
+          .attr("width", diameter)
+          .attr("height", diameter)
+          .attr("class", "pack")
+          .append("g");
+
+      var background = "black";
+
+      //key function to maintain the circles' identity
+      function key(d) {
+          return d.melid;
+      }
+
+      contain = body.append("div")
+        .attr("class", "buttons-container");
+
+      button = contain.append("div")
+          .attr("class", "button");
+
+      d3.csv("testing.csv", function(csvData) {
+        // put csv into a data structure pack layout will accept
+        var data = { name: "jazzsolos", children: csvData };
+
+        //does this function mix up the key function?
+        function sort_by_variable(column_name="performer") {
+          var column = column_name;
+          var data = d3.nest()
+            .key(function(d) { return d[column]; })
+            .entries(csvData);
+        }
+
+        sort_by_variable();
+
+        var solonodes = vis.data([data]).selectAll("circle")
+              .data(pack.nodes(data))
+          .enter().append("circle")
+              .attr("class", "node")
+              .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+              .attr("r", function(d) { return 10; })
+              .style("fill", "white")
+              .style("fill", function(d) {
+                if(!d.title){return background}
+                else {return colormap(d.melid);}
+              });
+
+        solonodes.append("title")
+          .text(function(d) { return d.title });
+
+        button.on("click", function(d){
+            solonodes.transition(800).style("fill", function(d){
+              if(!d.title){return background}
+              else {return "white";}
+            });
+        });
+
+        /*may have to create the initial pack layout, then when the button to
+        sort into clusters is pressed, fade out and fade in new layout - not
+        move the circles to new positions...*/
+
+        //function getkey(d) {return d.key};
+
+        //var data = {name: "jazzsolos", children: data["Art Pepper"]};
+        // data["Art Pepper"]
+
+      });
+
+      </script>
+  </body>
+</html>
