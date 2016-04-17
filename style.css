@@ -21,10 +21,6 @@ circle {
   fill-opacity: .5;
 }
 
-.out {
-  fill: blue;
-}
-
 text {
   font: 10px sans-serif;
 }

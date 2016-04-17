@@ -54,16 +54,19 @@ var svg = body.append("svg")
         .attr("class", function(d) { return !d.children ? "leaf" : "non-leaf"; })
         .attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; })
-        .attr("r", function(d) { return d.r; });
+        .attr("r", function(d) { return d.r; })
+        .on("mouseover", function() {
+          d3.select(this).classed("active",
+              function(d) {
+                  return !d.children ? true : false
+              });
+          })
+        .on("mouseout", function(){
+          d3.select(this).classed("active", false);
+        });
 
-    circles.on("mouseover", function() {
-      d3.select(this).attr("class",
-          function(d) {
-              return !d.children ? "active" : "none";
-          });
-    });
-    circles.on("mouseout", function(){
-      d3.select(this).style("class","out");
+    circles.on("click", function() {
+      d3.select(this).transition().attr("r", 100);
     });
 
 
